@@ -1,0 +1,50 @@
+name: Create vCluster
+on:
+  workflow_dispatch:
+    inputs:
+      cluster_name:
+        description: Name for the cluster
+        required: true
+      namespace_name:
+        description: Name for the namespace
+        required: true
+      cpu:
+        description: CPU limit for vCluster in millicores (e.g. 500)
+        required: true
+        default: 500
+      memory:
+        description: Memory limit for vCluster in Mi (e.g. 512)
+        required: true
+        default: 512
+      storage:
+        description: Persistent storage size in Gi (e.g. 10)
+        required: true
+        default: 10
+      workflow_id:
+        description: Temporal Workflow ID (optional)
+        required: false
+      signal_name:
+        description: Temporal Signal Name (required if workflow_id is set)
+        required: false
+      signal_payload:
+        description: Payload for the Temporal Signal (optional)
+        required: false
+jobs:
+  deploy-vcluster:
+    environment: aks
+    runs-on: self-hosted
+    env:
+      NAMESPACE_NAME: vcluster-${{ github.event.inputs.namespace_name }}
+      KUBECONFIG: ${{ vars.KUBECONFIG }}
+      CLUSTER_NAME: ${{ github.event.inputs.cluster_name }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Create vCluster with resource limits
+        run: |
+          echo "Creating vCluster with custom resources..."
+          helm upgrade --install $env:CLUSTER_NAME `
+          --create-namespace `
+          --set cluster_name=$env:CLUSTER_NAME `
+          --set namespace_name=$env:NAMESPACE_NAME `
+          ./armada-vcluster 
