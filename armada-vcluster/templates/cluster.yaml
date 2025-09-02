@@ -37,7 +37,7 @@ spec:
             enabled: false
             selector:
               labels:
-                agentpool: userpool01
+                agentpool: agentpool
       controlPlane:
         statefulSet:
           resources:
