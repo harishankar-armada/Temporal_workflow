@@ -37,7 +37,7 @@ jobs:
       run:
         shell: pwsh
     env:
-      NAMESPACE_NAME: vcluster-${{ github.event.inputs.namespace_name }}
+      NAMESPACE_NAME: ${{ github.event.inputs.namespace_name }}
       KUBECONFIG: ${{ vars.KUBECONFIG }}
       CLUSTER_NAME: ${{ github.event.inputs.cluster_name }}
       CPU: ${{ github.event.inputs.cpu }}
