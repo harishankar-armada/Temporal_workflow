@@ -1,53 +1,41 @@
-name: Azure Arc Onboarding
+name: Azure Arc Onboard (Windows Self-hosted)
 
 on:
   workflow_dispatch:
     inputs:
-      azureRegion:
-        description: 'Azure region for resource group'
+      clusterName:
+        description: 'Name of the Kubernetes cluster'
         required: true
-        default: 'westus3'
+        default: 'AzureArcVClusterTestPOC'
       resourceGroup:
-        description: 'Azure resource group name'
+        description: 'Azure Resource Group name'
         required: true
-        default: 'AzureVclsuterTest1'
-      arcClusterName:
-        description: 'Azure Arc cluster name'
+        default: 'AzureArcVClusterTest'
+      location:
+        description: 'Azure region (e.g. WestUS3)'
         required: true
+        default: 'WestUS3'
 
 jobs:
-  onboard-to-arc:
-    runs-on: ubuntu-latest
+  onboard-cluster:
+    runs-on: self-hosted
+    defaults:
+      run:
+        shell: pwsh  # Use PowerShell for Windows runners
+
     steps:
-      - name: Install Azure CLI
-        run: |
-          curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+    - name: Checkout repo
+      uses: actions/checkout@v3
 
-      - name: Azure Login
-        run: |
-          az login --service-principal --username ${{ secrets.AZURE_APP_ID }} --password ${{ secrets.AZURE_PASSWORD }} --tenant ${{ secrets.AZURE_TENANT_ID }}
-        env:
-          AZURE_APP_ID: ${{ secrets.AZURE_APP_ID }}
-          AZURE_PASSWORD: ${{ secrets.AZURE_PASSWORD }}
-          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+    - name: Create Resource Group
+      run: |
+        az group create `
+          --name "${{ github.event.inputs.resourceGroup }}" `
+          --location "${{ github.event.inputs.location }}" `
+          --output table
 
-      - name: Create Resource Group
-        run: |
-          az group create --location ${{ github.event.inputs.azureRegion }} --name ${{ github.event.inputs.resourceGroup }}
-
-      - name: Register Azure Providers
-        run: |
-          az provider register --namespace Microsoft.Kubernetes --wait
-          az provider register --namespace Microsoft.KubernetesConfiguration --wait
-          az provider register --namespace Microsoft.ExtendedLocation --wait
-
-      - name: Add and Update Azure CLI Extensions
-        run: |
-          az extension add --name connectedk8s --yes
-          az extension add --name k8s-configuration --yes
-
-      - name: Connect Cluster to Azure Arc
-        run: |
-          az connectedk8s connect --name ${{ github.event.inputs.arcClusterName }} --resource-group ${{ github.event.inputs.resourceGroup }} --correlation-id "d009f5dd-dba8-4ac7-bac9-b54ef3a6671a"
-        env:
-          KUBECONFIG: ${{ secrets.KUBECONFIG }}
+    - name: Connect Kubernetes Cluster to Azure Arc
+      run: |
+        az connectedk8s connect `
+          --name "${{ github.event.inputs.clusterName }}" `
+          --resource-group "${{ github.event.inputs.resourceGroup }}"

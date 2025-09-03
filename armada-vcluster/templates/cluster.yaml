@@ -53,6 +53,6 @@ spec:
           quota:
             requests.cpu: {{ add .Values.cluster_cpu 200 | add 550 }}m # required + 200m for controlPlane + 550m for arc
             requests.memory: {{ add .Values.cluster_ram 256 | add 1393 }}Mi # required in Mi + 256Mi for controlPlane + 1393Mi for arc
-            limits.cpu: {{ add .Values.cluster_cpu 200 | add 1770 }}m # required + 200m for controlPlane + 1770m for arc
+            limits.cpu: {{ add .Values.cluster_cpu 200 | add 2770 }}m # required + 200m for controlPlane + 1770m for arc
             limits.memory: {{ add .Values.cluster_ram 2048 | add 4350 }}Mi # required + 2Gi for controlPlane + 4350Mi for arc
             requests.storage: {{ .Values.cluster_storage }}Gi
