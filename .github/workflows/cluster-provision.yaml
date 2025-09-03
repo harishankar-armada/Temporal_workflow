@@ -48,11 +48,10 @@ jobs:
         uses: actions/checkout@v4
       - name: Create vCluster with resource limits
         run: |
-          helm upgrade --install $env:CLUSTER_NAME `
+          helm upgrade --install $env:CLUSTER_NAME ./armada-vcluster `
             --create-namespace `
             --set cluster_name=$env:CLUSTER_NAME `
             --set namespace_name=$env:NAMESPACE_NAME `
             --set cluster_cpu=$env:CPU `
             --set cluster_ram=$env:MEMORY `
-            --set cluster_storage=$env:STORAGE `
-            ./armada-vcluster
+            --set cluster_storage=$env:STORAGE
